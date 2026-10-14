@@ -1,18 +1,45 @@
 import React from 'react';
-import {AbsoluteFill,interpolate,spring,useCurrentFrame,useVideoConfig} from 'remotion';
-const NAVY='#243f56',INK='#182c3c',MUTED='#627788';
-const scenes=[
-{from:0,to:170,eyebrow:'ENSEIGNER, C’EST DÉJÀ BEAUCOUP.',title:'Planifier. Organiser. Évaluer.',sub:'Et si tout devenait plus simple?'},
-{from:170,to:330,eyebrow:'PRÉSENTATION',title:'Voici Henri.',sub:'Votre espace de travail en éducation physique.'},
-{from:330,to:540,eyebrow:'01 / PLANIFICATION',title:'Une année. Une vision.',sub:'Planification annuelle, séquences et séances au même endroit.'},
-{from:540,to:750,eyebrow:'02 / CALENDRIER',title:'Chaque cours, à sa place.',sub:'Retrouvez vos groupes et vos séances dans votre calendrier.'},
-{from:750,to:960,eyebrow:'03 / GROUPES',title:'Vos groupes. Simplifiés.',sub:'Élèves, équipes et organisation à portée de main.'},
-{from:960,to:1170,eyebrow:'04 / ÉVALUATIONS',title:'Évaluer. Sans s’éparpiller.',sub:'Des grilles liées aux cours et aux élèves.'},
-{from:1170,to:1500,eyebrow:'HENRI',title:'Plus de temps pour enseigner.',sub:'Moins de gestion. Plus d’essentiel.'}
-];
-const fade=(f:number,a:number,b:number)=>Math.min(1,Math.max(0,(f-a)/18),Math.max(0,(b-f)/22));
-export const HenriPromo:React.FC=()=>{const frame=useCurrentFrame();const {fps}=useVideoConfig();return <AbsoluteFill style={{background:'#f7f9fa',fontFamily:'Inter,Arial,sans-serif',color:INK,overflow:'hidden'}}>
-<div style={{position:'absolute',width:820,height:820,borderRadius:'50%',background:'radial-gradient(circle,rgba(86,132,166,.14),transparent 70%)',top:-280,right:-200,transform:`translateY(${Math.sin(frame/45)*28}px)`}}/>
-{scenes.map((s,i)=>{if(frame<s.from||frame>=s.to)return null;const local=frame-s.from;const opacity=fade(frame,s.from,s.to);const shift=interpolate(local,[0,30],[55,0],{extrapolateRight:'clamp'});return <AbsoluteFill key={i} style={{justifyContent:'center',padding:'0 170px',opacity,transform:`translateY(${shift}px)`}}><div style={{fontSize:25,letterSpacing:7,color:MUTED,fontWeight:650,marginBottom:30}}>{s.eyebrow}</div><div style={{fontSize:i===6?105:112,fontWeight:750,letterSpacing:-5,lineHeight:1.06,maxWidth:1580}}>{s.title}</div><div style={{fontSize:37,color:MUTED,marginTop:37,maxWidth:1320,lineHeight:1.35}}>{s.sub}</div><div style={{marginTop:80,width:140,height:5,background:NAVY,borderRadius:8,transform:`scaleX(${Math.min(1,local/35)})`,transformOrigin:'left'}}/></AbsoluteFill>})}
-<div style={{position:'absolute',bottom:68,left:170,fontSize:26,fontWeight:800,letterSpacing:2,color:NAVY}}>H<span style={{fontWeight:400,marginLeft:12}}>HENRI</span></div><div style={{position:'absolute',bottom:70,right:170,fontSize:20,color:MUTED}}>L’ÉDUCATION PHYSIQUE, SIMPLIFIÉE.</div>
-</AbsoluteFill>};
+import {AbsoluteFill,interpolate,Easing,useCurrentFrame} from 'remotion';
+
+/** Henri — cinematic product film. All elements are rendered as vector-like React UI.
+ * The product panels are illustrative mockups, not screenshots or user data.
+ */
+const ink='#172c3d',blue='#345b77',muted='#788c9a',line='#e6ecf0',paper='#fbfcfd';
+const ease=Easing.bezier(.2,.8,.2,1);
+const smooth=(v:number,a:number,b:number)=>interpolate(v,[a,b],[0,1],{extrapolateLeft:'clamp',extrapolateRight:'clamp',easing:ease});
+const opacity=(f:number,start:number,end:number)=>Math.min(smooth(f,start,start+22),1-smooth(f,end-25,end));
+const letters={letterSpacing:'-.055em'} as React.CSSProperties;
+const shadows='0 35px 90px rgba(20,47,70,.13),0 6px 20px rgba(20,47,70,.045)';
+const Icon=({type}:{type:'calendar'|'plan'|'group'|'eval'})=><div style={{width:42,height:42,borderRadius:13,background:'#eaf0f4',display:'grid',placeItems:'center',color:blue,fontSize:22,fontWeight:700}}>{({calendar:'▦',plan:'≡',group:'♧',eval:'✓'})[type]}</div>;
+const Text=({children,style}:{children:React.ReactNode,style?:React.CSSProperties})=><div style={style}>{children}</div>;
+const Chip=({children,color='#eef3f6'}:{children:React.ReactNode,color?:string})=><span style={{background:color,color:ink,borderRadius:9,padding:'8px 13px',fontSize:16,fontWeight:650,display:'inline-flex',alignItems:'center'}}>{children}</span>;
+const Frame=({children}:{children:React.ReactNode})=><div style={{width:1080,height:670,borderRadius:26,background:'#fff',border:'1px solid #e5ebef',boxShadow:shadows,overflow:'hidden',display:'flex',color:ink}}>
+  <div style={{width:230,background:'#f6f8f9',borderRight:'1px solid '+line,padding:'32px 23px'}}>
+    <div style={{fontSize:28,fontWeight:800,letterSpacing:-1.6,color:blue,marginBottom:66}}>H <span style={{fontSize:21,fontWeight:650,letterSpacing:-.5}}>Henri</span></div>
+    {['Accueil','Planifier','Mes groupes','Outils','Paramètres'].map((t,i)=><div key={t} style={{padding:'16px 13px',borderRadius:12,marginBottom:10,fontSize:18,color:i===1?blue:'#82919c',fontWeight:i===1?700:500,background:i===1?'#e6eef3':'transparent'}}>{['⌂','▤','♧','⚒','☷'][i]}　{t}</div>)}
+  </div>
+  <div style={{flex:1,padding:'42px 49px',overflow:'hidden'}}>{children}</div>
+</div>;
+const Planning=({frame}:{frame:number})=><Frame><Text style={{fontSize:15,color:muted,fontWeight:700,letterSpacing:2}}>PLANIFICATION ANNUELLE</Text><Text style={{fontSize:40,fontWeight:760,margin:'16px 0 8px',...letters}}>Une année, à votre façon.</Text><Text style={{fontSize:18,color:muted,marginBottom:37}}>Du premier cours à la dernière évaluation.</Text>
+{[{name:'Ultimate',c:'#4c8290',n:4},{name:'Badminton',c:'#ba8453',n:6},{name:'Basketball',c:'#816ca3',n:5}].map((b,i)=><div key={b.name} style={{display:'flex',alignItems:'center',gap:20,border:'1px solid '+line,borderRadius:15,padding:20,marginBottom:15,opacity:smooth(frame,380+i*18,400+i*18),transform:'translateX('+((1-smooth(frame,380+i*18,410+i*18))*35)+'px)'}}><div style={{width:7,height:50,borderRadius:8,background:b.c}}/><div style={{flex:1}}><div style={{fontSize:22,fontWeight:720}}>{b.name}</div><div style={{fontSize:15,color:muted,marginTop:5}}>{b.n} cours · Séquence</div></div><Chip>{i===0?'Sept. – Oct.':i===1?'Oct. – Déc.':'Janv. – Fév.'}</Chip></div>)}</Frame>;
+const Calendar=({frame}:{frame:number})=><Frame><Text style={{fontSize:15,color:muted,fontWeight:700,letterSpacing:2}}>CALENDRIER</Text><Text style={{fontSize:40,fontWeight:760,margin:'16px 0 25px',...letters}}>Votre semaine. En un regard.</Text><div style={{display:'flex',gap:12}}>{['LUN','MAR','MER','JEU','VEN'].map((d,i)=><div key={d} style={{flex:1,border:'1px solid '+line,borderRadius:13,overflow:'hidden',minHeight:405,opacity:smooth(frame,620+i*12,645+i*12)}}><div style={{padding:'16px 10px',fontSize:15,fontWeight:750,textAlign:'center',borderBottom:'1px solid '+line}}>{d}</div>{[0,1].map((n)=><div key={n} style={{margin:'12px 8px',borderLeft:'4px solid '+['#345b77','#c08350','#589077','#9775aa','#bd6672'][(i+n)%5],padding:'12px 8px',background:'#f7f9fa',borderRadius:7}}><Text style={{fontSize:12,color:muted}}> {n===0?'8 h 10':'10 h 25'}</Text><Text style={{fontSize:14,fontWeight:700,marginTop:5}}>EDU{i+1}G2-0{n+1}</Text><Text style={{fontSize:13,color:blue,marginTop:9}}>{n===0?'Ultimate':'Badminton'}</Text></div>)}</div>)}</div></Frame>;
+const Groups=({frame}:{frame:number})=><Frame><Text style={{fontSize:15,color:muted,fontWeight:700,letterSpacing:2}}>MES GROUPES</Text><Text style={{fontSize:40,fontWeight:760,margin:'16px 0 30px',...letters}}>Tous vos groupes. Réunis.</Text>{['EDU3G2-02','EDU4G2-04','EDU5G2-01'].map((g,i)=><div key={g} style={{display:'flex',alignItems:'center',padding:24,marginBottom:15,border:'1px solid '+line,borderRadius:15,gap:22,opacity:smooth(frame,850+i*17,880+i*17)}}><div style={{width:52,height:52,borderRadius:16,background:['#e8f0f4','#f4eee7','#eef0f6'][i],display:'grid',placeItems:'center',fontSize:25,color:blue}}>♧</div><div style={{flex:1}}><Text style={{fontSize:22,fontWeight:700}}>{g}</Text><Text style={{fontSize:15,color:muted,marginTop:5}}>Élèves · Équipes · Séances</Text></div><div style={{fontSize:22,color:blue}}>→</div></div>)}</Frame>;
+const Evaluation=({frame}:{frame:number})=><Frame><Text style={{fontSize:15,color:muted,fontWeight:700,letterSpacing:2}}>ÉVALUATION</Text><Text style={{fontSize:40,fontWeight:760,margin:'16px 0 28px',...letters}}>L'évaluation, connectée au cours.</Text><div style={{border:'1px solid '+line,borderRadius:17,padding:28}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:22}}><Text style={{fontSize:24,fontWeight:730}}>Ultimate · Évaluation</Text><Chip>Compétence C2</Chip></div>{[{t:'Précision des passes',v:85},{t:'Démarquage',v:70},{t:'Prise de décision',v:92}].map((x,i)=><div key={x.t} style={{marginBottom:26}}><div style={{display:'flex',justifyContent:'space-between',fontSize:18,marginBottom:10}}><span>{x.t}</span><span style={{fontWeight:700}}>{x.v}%</span></div><div style={{height:12,background:'#edf2f5',borderRadius:9,overflow:'hidden'}}><div style={{height:'100%',width:(x.v*smooth(frame,1080+i*15,1125+i*15))+'%',background:blue,borderRadius:9}}/></div></div>)}</div></Frame>;
+const Reveal=({frame}:{frame:number})=><div style={{position:'absolute',top:105,left:390,transform:'perspective(1900px) rotateY('+interpolate(frame,[320,450],[12,0],{extrapolateRight:'clamp'})+'deg) translateY('+((1-smooth(frame,325,370))*90)+'px) scale(.86)',transformOrigin:'center',opacity:smooth(frame,325,355)}}><Planning frame={frame}/></div>;
+const scenes=[{a:0,b:165,k:'INTRO',headline:'Moins de gestion.',sub:'Plus de temps pour enseigner.'},{a:165,b:330,k:'HENRI',headline:'Votre quotidien. Simplifié.',sub:'Une seule application pour tout organiser.'},{a:330,b:555,k:'PLANIFICATION',headline:'Tout commence ici.',sub:'Planification annuelle · Séquences · Séances'},{a:555,b:785,k:'CALENDRIER',headline:'Chaque cours à sa place.',sub:'Un horaire clair. Des changements simples.'},{a:785,b:1010,k:'GROUPES',headline:'Tout le monde, au même endroit.',sub:'Groupes · Élèves · Équipes'},{a:1010,b:1235,k:'ÉVALUATIONS',headline:'Évaluer devient plus simple.',sub:'Des grilles directement liées à vos cours.'},{a:1235,b:1500,k:'HENRI',headline:'Enseignez.',sub:'Henri s’occupe du reste.'}];
+export const HenriPromo:React.FC=()=>{
+const frame=useCurrentFrame();const scene=scenes.find(s=>frame>=s.a&&frame<s.b)||scenes[6];const isUI=frame>=330&&frame<1235;
+return <AbsoluteFill style={{fontFamily:'Inter,Arial,sans-serif',background:paper,color:ink,overflow:'hidden'}}>
+<div style={{position:'absolute',width:1400,height:1400,borderRadius:'50%',right:-580,top:-620,background:'radial-gradient(circle,#e7f0f5 0%,rgba(231,240,245,0) 68%)',transform:'translateY('+Math.sin(frame/48)*25+'px)'}}/>
+<div style={{position:'absolute',top:58,left:96,fontSize:25,fontWeight:800,color:blue,letterSpacing:-1}}>H <span style={{fontWeight:500,letterSpacing:0,marginLeft:9}}>Henri</span></div>
+{!isUI?<AbsoluteFill style={{display:'flex',justifyContent:'center',padding:'0 155px',opacity:opacity(frame,scene.a,scene.b),transform:'translateY('+((1-smooth(frame,scene.a,scene.a+38))*60)+'px)'}}>
+<Text style={{fontSize:20,letterSpacing:6,fontWeight:700,color:blue,marginBottom:38}}>{scene.k}</Text><Text style={{fontSize:frame<165?126:frame>1235?160:114,fontWeight:800,letterSpacing:-8,lineHeight:1.05,maxWidth:1600}}>{scene.headline}</Text><Text style={{fontSize:42,color:muted,marginTop:35,letterSpacing:-1}}>{scene.sub}</Text>
+</AbsoluteFill>:<>
+<div style={{position:'absolute',left:95,top:210,width:520,opacity:opacity(frame,scene.a,scene.b),transform:'translateY('+((1-smooth(frame,scene.a,scene.a+34))*40)+'px)'}}><Text style={{fontSize:19,fontWeight:750,letterSpacing:5,color:blue,marginBottom:29}}>{scene.k}</Text><Text style={{fontSize:74,fontWeight:800,letterSpacing:-5,lineHeight:1.06}}>{scene.headline}</Text><Text style={{fontSize:28,color:muted,marginTop:29,lineHeight:1.3}}>{scene.sub}</Text></div>
+<div style={{position:'absolute',top:180,left:660,transform:'scale(.95)',transformOrigin:'top left',opacity:opacity(frame,scene.a,scene.b)}}>
+{frame<555?<Planning frame={frame}/>:frame<785?<Calendar frame={frame}/>:frame<1010?<Groups frame={frame}/>:<Evaluation frame={frame}/>}
+</div></>}
+<div style={{position:'absolute',bottom:54,left:96,right:96,height:2,background:'#e3eaf0'}}/><div style={{position:'absolute',bottom:54,left:96,width:(frame/1500)*1728,height:2,background:blue}}/>
+<div style={{position:'absolute',bottom:70,right:96,fontSize:16,color:muted,letterSpacing:2}}>HENRI · L’ÉDUCATION PHYSIQUE, SIMPLIFIÉE</div>
+</AbsoluteFill>;
+};
